@@ -21,10 +21,10 @@ class Alarm {
     }
     
     // アラーム設定時刻の文字列が「h:mm:ss」型になっているか検証
-    func isMatch(_ str: String) -> Bool {
+    func isMatch(_ timeText: String) -> Bool {
         let pattern = "(^[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return false }
-        let result = regex.matches(in: str, range: NSRange(0..<str.count))
+        let result = regex.matches(in: timeText, range: NSRange(0..<timeText.count))
         return result.count > 0
     }
     
@@ -61,7 +61,7 @@ class Alarm {
     // タイマークラスのインターバルごとに実行するメソッド
     @objc func wakeUp() {
         // 現在時刻を表示
-        let now: String = dateFormatter.string(from: Date())
+        let now = dateFormatter.string(from: Date())
         print(now)
         
         // アラーム設定時刻になった際の処理
@@ -70,22 +70,26 @@ class Alarm {
             let soundIdRing: SystemSoundID = 1000
             AudioServicesPlaySystemSound(soundIdRing)
             
-            // 残りスヌーズ回数に応じた処理
-            if snoozeTimes > 0 {
-                let newSettingTime = Calendar.current.date(byAdding: .second, value: snoozeInterval, to: Date())!
-                settingTime = dateFormatter.string(from: newSettingTime)
-                snoozeTimes -= 1
-                print("（snooze）\n")
-            } else {
-                timer?.invalidate()
-            }
+            snooze()
+        }
+    }
+    
+    // 残りスヌーズ回数に応じた処理
+    func snooze() {
+        if snoozeTimes > 0 {
+            let newSettingTime = Calendar.current.date(byAdding: .second, value: snoozeInterval, to: Date())!
+            settingTime = dateFormatter.string(from: newSettingTime)
+            snoozeTimes -= 1
+            print("（snooze）\n")
+        } else {
+            timer?.invalidate()
         }
     }
 }
 
 // 各種設定
-let settingTime: String = "8:48:00" // アラームの設定時刻を h:mm:ss で指定
-let snoozeOnOff: Bool = false       // スヌーズ ON:true, OFF:false
+let settingTime: String = "4:06:00" // アラームの設定時刻を h:mm:ss で指定
+let snoozeOnOff: Bool = true       // スヌーズ ON:true, OFF:false
 let snoozeTimes: Int = 2            // スヌーズの回数を指定
 let snoozeInterval: Int = 5         // スヌーズのインターバルを秒で指定
 
